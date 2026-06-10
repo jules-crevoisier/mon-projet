@@ -21,8 +21,7 @@ WORKDIR /var/www/html
 
 ENV APP_ENV=prod \
     APP_DEBUG=0 \
-    APP_SECRET=build_time_secret_change_at_runtime \
-    DATABASE_URL=postgresql://app:app@localhost:5432/app
+    DATABASE_URL=postgresql://app:app@localhost:5432/app?serverVersion=16\&charset=utf8
 
 COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-scripts
@@ -32,7 +31,7 @@ COPY docker/render/apache.conf /etc/apache2/sites-available/000-default.conf
 COPY docker/render/start.sh /usr/local/bin/render-start.sh
 
 RUN composer dump-autoload --no-dev --classmap-authoritative \
-    && php bin/console assets:install public --no-interaction || true \
+    && APP_SECRET=build_time_secret_change_at_runtime php bin/console assets:install public --no-interaction || true \
     && chmod +x /usr/local/bin/render-start.sh \
     && mkdir -p var/cache var/log \
     && chown -R www-data:www-data var

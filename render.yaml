@@ -14,20 +14,17 @@ services:
         value: "0"
       - key: APP_SECRET
         generateValue: true
-      - key: DATABASE_URL
+      - key: DATABASE_URL_BASE
         fromDatabase:
           name: wr406d-sportcars-db
           property: connectionString
       - key: CORS_ALLOW_ORIGIN
         value: ^https://wr406d-sportcars-front\.onrender\.com$
-      - key: LOAD_FIXTURES
-        value: "1"
 
   - type: web
     name: wr406d-sportcars-front
     runtime: static
     plan: free
-    region: frankfurt
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
     envVars:
