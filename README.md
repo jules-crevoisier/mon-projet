@@ -2,6 +2,8 @@
 
 Application Vue 3 réalisée pour le TP WR406D du 10 juin 2026.
 
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/jules-crevoisier/mon-projet)
+
 ## Fonctionnalités
 
 - CRUD des voitures de sport
