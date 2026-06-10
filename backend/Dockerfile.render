@@ -1,0 +1,42 @@
+FROM php:8.3-apache
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        git \
+        libicu-dev \
+        libpq-dev \
+        libzip-dev \
+        unzip \
+    && docker-php-ext-install \
+        intl \
+        opcache \
+        pdo_pgsql \
+        zip \
+    && a2enmod rewrite headers \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+WORKDIR /var/www/html
+
+ENV APP_ENV=prod \
+    APP_DEBUG=0 \
+    APP_SECRET=build_time_secret_change_at_runtime \
+    DATABASE_URL=postgresql://app:app@localhost:5432/app
+
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-scripts
+
+COPY . .
+COPY docker/render/apache.conf /etc/apache2/sites-available/000-default.conf
+COPY docker/render/start.sh /usr/local/bin/render-start.sh
+
+RUN composer dump-autoload --no-dev --classmap-authoritative \
+    && php bin/console assets:install public --no-interaction || true \
+    && chmod +x /usr/local/bin/render-start.sh \
+    && mkdir -p var/cache var/log \
+    && chown -R www-data:www-data var
+
+EXPOSE 10000
+
+CMD ["render-start.sh"]
